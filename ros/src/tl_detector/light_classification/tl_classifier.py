@@ -54,10 +54,6 @@ class TLClassifier(object):
 
         return switcher.get(classification, TrafficLight.UNKNOWN)
 
-    def load_image_into_numpy_array(self, image):
-        (im_width, im_height) = image.size
-        return np.array(image.getdata()).reshape((im_height, im_width, 3)).astype(np.uint8)
-
     def get_classification(self, image):
         """Determines the color of the traffic light in the image
 
@@ -68,6 +64,5 @@ class TLClassifier(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-        np_image = self.load_image_into_numpy_array(image)
-        np_image_expanded = np.expand_dims(np_image, axis=0)
+        np_image_expanded = np.expand_dims(image, axis=0)
         return self.run(np_image_expanded)
