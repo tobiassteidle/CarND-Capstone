@@ -54,12 +54,12 @@ class TLClassifier(object):
 
     def resolve_traffic_light_text(self, classification):
         switcher = {
-            1: TrafficLight.GREEN,
-            2: TrafficLight.RED,
-            3: TrafficLight.YELLOW,
-            4: TrafficLight.UNKNOWN
+            1: "GREEN",
+            2: "RED",
+            3: "YELLOW",
+            4: "UNKNOWN"
         }
-        return switcher.get(classification, TrafficLight.UNKNOWN)
+        return switcher.get(classification, "UNKNOWN")
 
     def get_classification(self, image):
         """Determines the color of the traffic light in the image
