@@ -44,9 +44,10 @@ class TLClassifier(object):
         scores = np.squeeze(scores)
         classes = np.squeeze(classes).astype(np.int32)
 
-        for i in range(boxes.shape[0]):
-            if scores is not None and scores[i] > 0.6:
-                class_name = self.categorys[classes[i]]['name']
+        for score, class_index in zip(scores, classes):
+            print(score)
+            if score > 0.3:
+                class_name = self.categorys[classes[class_index]]['name']
                 rospy.logdebug('TLClassifier: Color = %s', class_name)
 
                 if class_name == 'Red':
