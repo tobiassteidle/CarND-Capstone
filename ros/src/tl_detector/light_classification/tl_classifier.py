@@ -6,7 +6,9 @@ import rospy
 
 class TLClassifier(object):
     def __init__(self):
-        self.classification_graph = self.load_graph('light_classification/frozen_inference_graph_real.pb')
+        self.classification_graph = self.load_graph('light_classification/mobilenet_frozen_graph/real_frozen_inference_graph.pb')
+        #self.classification_graph = self.load_graph('light_classification/mobilenet_frozen_graph/sim_frozen_inference_graph.pb')
+
         self.input_image = self.classification_graph.get_tensor_by_name('image_tensor:0')
 
         self.detection_classes = self.classification_graph.get_tensor_by_name('detection_classes:0')
