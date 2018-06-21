@@ -25,7 +25,7 @@ class TLClassifier(object):
         self.sess = tf.Session(graph=self.classification_graph)
 
     def load_graph(self, graph_file):
-        rospy.loginfo('Loading Graph_file "' + graph_file + '""')
+        rospy.logdebug('Loading Graph_file "' + graph_file + '""')
         graph = tf.Graph()
         with graph.as_default():
             od_graph_def = tf.GraphDef()
@@ -34,11 +34,11 @@ class TLClassifier(object):
                 od_graph_def.ParseFromString(serialized_graph)
                 tf.import_graph_def(od_graph_def, name='')
 
-        rospy.loginfo('Graph_file loaded.')
+        rospy.logdebug('Graph_file loaded.')
         return graph
 
     def run(self, image):
-        rospy.loginfo('TLClassifier.run()...')
+        rospy.logdebug('TLClassifier.run()...')
         (classes, detection, scores, boxes) = self.sess.run([self.detection_classes, self.detection_number,
                                                             self.detection_scores, self.detection_boxes],
                                                             feed_dict={self.input_image: image})
@@ -50,7 +50,7 @@ class TLClassifier(object):
         for score, class_index in zip(scores, classes):
             if score > 0.6:
                 class_name = self.categorys[classes[class_index]]['name']
-                rospy.loginfo('TLClassifier: Color = %s', class_name)
+                rospy.logdebug('TLClassifier: Color = %s', class_name)
 
                 if class_name == 'Red':
                     return TrafficLight.RED
