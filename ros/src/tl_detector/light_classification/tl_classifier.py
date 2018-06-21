@@ -6,8 +6,12 @@ import rospy
 
 class TLClassifier(object):
     def __init__(self):
-        self.classification_graph = self.load_graph('light_classification/classification_frozen_graph/real_frozen_inference_graph.pb')
-        #self.classification_graph = self.load_graph('light_classification/classification_frozen_graph/sim_frozen_inference_graph.pb')
+        is_simulation = rospy.get_param('/waypoint_loader/velocity') * 1000 / 3600 > 10;
+
+        if is_simulation:
+            self.classification_graph = self.load_graph('light_classification/classification_frozen_graph/sim_frozen_inference_graph.pb')
+        else:
+            self.classification_graph = self.load_graph('light_classification/classification_frozen_graph/real_frozen_inference_graph.pb')
 
         self.input_image = self.classification_graph.get_tensor_by_name('image_tensor:0')
 
@@ -32,6 +36,8 @@ class TLClassifier(object):
                 tf.import_graph_def(od_graph_def, name='')
 
         rospy.loginfo('Graph_file loaded.')
+
+        rospy.logfatal(rospy.get_para)
         return graph
 
     def run(self, image):
@@ -48,7 +54,7 @@ class TLClassifier(object):
             print(score)
             if score > 0.3:
                 class_name = self.categorys[classes[class_index]]['name']
-                rospy.logdebug('TLClassifier: Color = %s', class_name)
+                rospy.loginfo('TLClassifier: Color = %s', class_name)
 
                 if class_name == 'Red':
                     return TrafficLight.RED
