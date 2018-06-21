@@ -16,7 +16,7 @@ class TLClassifier(object):
         self.detection_scores = self.classification_graph.get_tensor_by_name('detection_scores:0')
         self.detection_boxes = self.classification_graph.get_tensor_by_name('detection_boxes:0')
 
-        self.categorys = {1: {"name": "Green"}, 2: {"name": "Red"}, 3: {"name": "Yellow"}, 4: {"name": "Off"}}
+        self.categorys = {1: {"name": "Red"}, 2: {"name": "Yellow"}, 3: {"name": "Green"}, 4: {"name": "Unkown"}}
 
         self.sess = tf.Session(graph=self.classification_graph)
 
