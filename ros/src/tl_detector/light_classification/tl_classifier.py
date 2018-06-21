@@ -34,32 +34,27 @@ class TLClassifier(object):
 
     def run(self, image):
         rospy.loginfo('TLClassifier.run()...')
-        classes, detection, scores, boxes = self.sess.run([self.detection_classes, self.detection_number,
+        (classes, detection, scores, boxes) = self.sess.run([self.detection_classes, self.detection_number,
                                                            self.detection_scores, self.detection_boxes],
                                                           feed_dict={self.input_image: image})
 
-        detected_class = int(np.squeeze(classes)[0])
-        traffic_light = self.resolve_traffic_light(detected_class)
-        rospy.loginfo('Traffic light: ' + self.resolve_traffic_light_text(detected_class))
-        return traffic_light
+        boxes = np.squeeze(boxes)
+        scores = np.squeeze(scores)
+        classes = np.squeeze(classes).astype(np.int32)
 
-    def resolve_traffic_light(self, classification):
-        switcher = {
-            1: TrafficLight.GREEN,
-            2: TrafficLight.RED,
-            3: TrafficLight.YELLOW,
-            4: TrafficLight.UNKNOWN
-        }
-        return switcher.get(classification, TrafficLight.UNKNOWN)
+        for i in range(boxes.shape[0]):
+            if scores is not None and scores[i] > 0.6:
+                class_name = self.category_index[classes[i]]['name']
+                rospy.logdebug('TLClassifier: Color = %s', class_name)
 
-    def resolve_traffic_light_text(self, classification):
-        switcher = {
-            1: "GREEN",
-            2: "RED",
-            3: "YELLOW",
-            4: "UNKNOWN"
-        }
-        return switcher.get(classification, "UNKNOWN")
+                if class_name == 'Red':
+                    return TrafficLight.RED
+                elif class_name == 'Yellow':
+                    return TrafficLight.YELLOW
+                elif class_name == 'Green':
+                    return TrafficLight.GREEN
+
+        return TrafficLight.UNKNOWN
 
     def get_classification(self, image):
         """Determines the color of the traffic light in the image
