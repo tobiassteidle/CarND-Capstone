@@ -6,8 +6,8 @@ import rospy
 
 class TLClassifier(object):
     def __init__(self):
-        self.classification_graph = self.load_graph('light_classification/mobilenet_frozen_graph/real_frozen_inference_graph.pb')
-        #self.classification_graph = self.load_graph('light_classification/mobilenet_frozen_graph/sim_frozen_inference_graph.pb')
+        self.classification_graph = self.load_graph('light_classification/classification_frozen_graph/real_frozen_inference_graph.pb')
+        #self.classification_graph = self.load_graph('light_classification/classification_frozen_graph/sim_frozen_inference_graph.pb')
 
         self.input_image = self.classification_graph.get_tensor_by_name('image_tensor:0')
 
@@ -15,6 +15,8 @@ class TLClassifier(object):
         self.detection_number = self.classification_graph.get_tensor_by_name('num_detections:0')
         self.detection_scores = self.classification_graph.get_tensor_by_name('detection_scores:0')
         self.detection_boxes = self.classification_graph.get_tensor_by_name('detection_boxes:0')
+
+        self.categorys = {1: {"name": "Green"}, 2: {"name": "Red"}, 3: {"name": "Yellow"}, 4: {"name": "Off"}}
 
         self.sess = tf.Session(graph=self.classification_graph)
 
@@ -35,8 +37,8 @@ class TLClassifier(object):
     def run(self, image):
         rospy.loginfo('TLClassifier.run()...')
         (classes, detection, scores, boxes) = self.sess.run([self.detection_classes, self.detection_number,
-                                                           self.detection_scores, self.detection_boxes],
-                                                          feed_dict={self.input_image: image})
+                                                            self.detection_scores, self.detection_boxes],
+                                                            feed_dict={self.input_image: image})
 
         boxes = np.squeeze(boxes)
         scores = np.squeeze(scores)
@@ -44,7 +46,7 @@ class TLClassifier(object):
 
         for i in range(boxes.shape[0]):
             if scores is not None and scores[i] > 0.6:
-                class_name = self.category_index[classes[i]]['name']
+                class_name = self.categorys[classes[i]]['name']
                 rospy.logdebug('TLClassifier: Color = %s', class_name)
 
                 if class_name == 'Red':
