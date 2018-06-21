@@ -2,10 +2,11 @@ from styx_msgs.msg import TrafficLight
 import tensorflow as tf
 import numpy as np
 from styx_msgs.msg import TrafficLight
+import rospy
 
 class TLClassifier(object):
     def __init__(self):
-        self.classification_graph = self.load_graph('light_classification/frozen_classification_graph.pb')
+        self.classification_graph = self.load_graph('light_classification/frozen_inference_graph_real.pb')
         self.input_image = self.classification_graph.get_tensor_by_name('image_tensor:0')
 
         self.detection_classes = self.classification_graph.get_tensor_by_name('detection_classes:0')
@@ -16,6 +17,7 @@ class TLClassifier(object):
         self.sess = tf.Session(graph=self.classification_graph)
 
     def load_graph(self, graph_file):
+        rospy.loginfo('Loading Graph_file "' + graph_file + '""')
         """Loads a frozen inference graph"""
         graph = tf.Graph()
         with graph.as_default():
@@ -25,33 +27,36 @@ class TLClassifier(object):
                 od_graph_def.ParseFromString(serialized_graph)
                 tf.import_graph_def(od_graph_def, name='')
 
+        rospy.loginfo('Graph_file loaded.')
         return graph
 
     def run(self, image):
+        rospy.loginfo('TLClassifier.run()...')
         classes, detection, scores, boxes = self.sess.run([self.detection_classes, self.detection_number,
                                                            self.detection_scores, self.detection_boxes],
                                                           feed_dict={self.input_image: image})
 
-        return self.resolve_traffic_light(int(np.squeeze(classes)[0]))
+        detected_class = int(np.squeeze(classes)[0])
+        traffic_light = self.resolve_traffic_light(detected_class)
+        rospy.loginfo('Traffic light: ' + self.resolve_traffic_light_text(detected_class))
+        return traffic_light
 
     def resolve_traffic_light(self, classification):
         switcher = {
             1: TrafficLight.GREEN,
             2: TrafficLight.RED,
-            3: TrafficLight.GREEN,
-            4: TrafficLight.GREEN,
-            5: TrafficLight.RED,
-            6: TrafficLight.RED,
-            7: TrafficLight.YELLOW,
-            8: TrafficLight.UNKNOWN,
-            9: TrafficLight.RED,
-            10: TrafficLight.GREEN,
-            11: TrafficLight.GREEN,
-            12: TrafficLight.GREEN,
-            13: TrafficLight.RED,
-            14: TrafficLight.RED
+            3: TrafficLight.YELLOW,
+            4: TrafficLight.UNKNOWN
         }
+        return switcher.get(classification, TrafficLight.UNKNOWN)
 
+    def resolve_traffic_light_text(self, classification):
+        switcher = {
+            1: TrafficLight.GREEN,
+            2: TrafficLight.RED,
+            3: TrafficLight.YELLOW,
+            4: TrafficLight.UNKNOWN
+        }
         return switcher.get(classification, TrafficLight.UNKNOWN)
 
     def get_classification(self, image):
