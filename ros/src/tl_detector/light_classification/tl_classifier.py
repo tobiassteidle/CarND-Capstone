@@ -26,7 +26,6 @@ class TLClassifier(object):
 
     def load_graph(self, graph_file):
         rospy.loginfo('Loading Graph_file "' + graph_file + '""')
-        """Loads a frozen inference graph"""
         graph = tf.Graph()
         with graph.as_default():
             od_graph_def = tf.GraphDef()
@@ -36,8 +35,6 @@ class TLClassifier(object):
                 tf.import_graph_def(od_graph_def, name='')
 
         rospy.loginfo('Graph_file loaded.')
-
-        rospy.logfatal(rospy.get_para)
         return graph
 
     def run(self, image):
